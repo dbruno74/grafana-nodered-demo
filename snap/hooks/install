@@ -1,0 +1,9 @@
+#!/bin/sh
+
+mkdir -p ${SNAP_DATA}/conf
+cp ${SNAP}/config/grafana.ini ${SNAP_DATA}/conf/
+cp -r ${SNAP}/config/dashboards ${SNAP_DATA}/conf/
+mkdir -p ${SNAP_COMMON}/data/plugins
+cp -r ${SNAP}/grafana-mqtt-datasource ${SNAP_COMMON}/data/plugins
+mkdir -p ${SNAP_COMMON}/conf
+cp -r ${SNAP}/config/provisioning ${SNAP_COMMON}/conf/

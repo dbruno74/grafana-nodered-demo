@@ -1,0 +1,86 @@
+name: grafana-nodered-demo
+adopt-info: grafana
+summary: Grafana snap for IoT Device nodered demo
+description: |
+        Grafana snap which come with the MQTT plugin and all the required configurations to run
+        the IoT Device nodered demo. The snap is supposed to be installed on a local pc.
+        Once installed, point your browser to http://localhost:3000 to access the grafana dashboard.
+        The Grafana snap includes a Data source configured to connect to hivemq public MQTT broker.
+        To change the broker, login to grafana with admin/admin and go to "Data Sources/MQTT".
+        The grafana.ini file is located in $SNAP_DATA/conf/grafana.ini. Edit with root permissions to change the configuration
+        (e.g. to change the grafana http port, search for "http_port" and change the port accordingly.
+        The snap provides a content interface slot called "writable".
+        The "writable" slot allows r/w on $SNAP_DATA/conf. Tipical usage is to add/modify a custom grafana.ini file.
+        To connect to the interface, your snap should declare a "writable" slot as described below:
+               plugs:
+                  writable:
+                      interface: content
+                      content: writable-data
+                      target: <your target dir>
+        More info on content interface here: https://snapcraft.io/docs/content-interface
+
+        Use the following command to connect the interface:
+        snap connect <your-snap-name>:writable grafana-cs:writable
+
+confinement: strict
+grade: stable
+base: core22
+
+#TODO: add support for arm64
+architectures:
+  - build-on: amd64
+    build-for: amd64
+
+apps:
+  grafana:
+    command: 'bin/grafana.wrapper'
+    plugs: [network-bind, network]
+    daemon: simple
+
+  grafana-cli:
+    command: 'bin/grafana-cli.wrapper'
+    plugs: [network-bind, network]
+
+parts:
+  grafana:
+    plugin: nil
+    build-snaps:
+       - grafana/rock/edge
+    override-pull: |
+       UBUNTU_STORE_ARCH=$CRAFT_TARGET_ARCH snap download grafana --channel=rock/edge
+       find *.snap -exec unsquashfs -f -d $CRAFT_PART_INSTALL {} \;
+    override-build: |
+       # cleaning PATH from INSTALL and STAGE directories
+       export PATH=$(echo $PATH | sed -e 's,:*'$CRAFT_PART_INSTALL'[^:]*:*,,g')
+       export PATH=$(echo $PATH | sed -e 's,:*'$CRAFT_STAGE'[^:]*:*,,g')
+       echo $PATH
+
+       VER=$(grafana.grafana-cli -v | awk -F'version ' '{print $2}')
+       craftctl set version=$VER
+
+#TODO: add support for arm64 (https://grafana.com/api/plugins/grafana-mqtt-datasource/versions/1.0.0-beta.3/download?os=linux&arch=arm64)
+  grafana-mqtt-datasource:
+    plugin: dump
+    source: https://grafana.com/api/plugins/grafana-mqtt-datasource/versions/1.0.0-beta.3/download?os=linux&arch=amd64
+    source-type: zip
+
+  config:
+    source: .
+    plugin: nil
+    override-build: |
+      # cleaning PATH from INSTALL and STAGE directories
+      export PATH=$(echo $PATH | sed -e 's,:*'$CRAFT_PART_INSTALL'[^:]*:*,,g')
+      export PATH=$(echo $PATH | sed -e 's,:*'$CRAFT_STAGE'[^:]*:*,,g')
+      echo $PATH
+
+      cp -r config $CRAFT_PART_INSTALL
+
+
+slots:
+  writable: 
+     interface: content
+     content: writable-data
+     write:
+       - $SNAP_DATA/conf
+
+
