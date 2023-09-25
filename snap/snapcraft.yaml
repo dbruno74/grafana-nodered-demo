@@ -1,5 +1,6 @@
 name: grafana-nodered-demo
 adopt-info: grafana
+website: https://github.com/dbruno74/grafana-nodered-demo
 summary: Grafana snap for IoT Device nodered demo
 description: |
         Grafana snap which come with the MQTT plugin and all the required configurations to run
@@ -20,7 +21,7 @@ description: |
         More info on content interface here: https://snapcraft.io/docs/content-interface
 
         Use the following command to connect the interface:
-        snap connect <your-snap-name>:writable grafana-cs:writable
+        snap connect <your-snap-name>:writable grafana-nodered-demo:writable
 
 confinement: strict
 grade: stable

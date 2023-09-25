@@ -28,7 +28,7 @@ More info on content interface here: https://snapcraft.io/docs/content-interface
 ## How to use it
 Use the following command to connect the interface:
 ```
-snap connect <your-snap-name>:writable grafana-cs:writable
+snap connect <your-snap-name>:writable grafana-nodered-demo:writable
 ```
 
 # Grafana plugins
